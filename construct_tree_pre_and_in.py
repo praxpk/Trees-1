@@ -11,21 +11,27 @@ class TreeNode:
 
 class Solution:
     def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
-        return self.helper(preorder, inorder)
 
-    def helper(self, preorder, inorder):
-        if len(preorder) == 0 or len(inorder) == 0:
+        self.preorder_index = 0
+
+        # build a hashmap to store index and value for inorder list
+        inorder_index_map = {}
+        for index, value in enumerate(inorder):
+            inorder_index_map[value] = index
+
+        return self.helper(0, len(preorder) - 1, preorder, inorder_index_map)
+    
+    def helper(self, left, right, preorder, inorder_index_map):
+        if left > right:
             return None
 
-        root = preorder[0]
+        # select the preorder_index element as the root and increment it
+        root_value = preorder[self.preorder_index]
+        root = TreeNode(root_value)
+        self.preorder_index+=1
+        
+        # build left and right subtree
+        root.left = self.helper(left, inorder_index_map[root_value] - 1, preorder, inorder_index_map)
+        root.right = self.helper(inorder_index_map[root_value] + 1, right, preorder, inorder_index_map)
 
-        inorderRootPos = inorder.index(root)
-
-        inLeft = inorder[:inorderRootPos]
-        preLeft = preorder[1 : 1 + len(inLeft)]
-        inRight = inorder[inorderRootPos + 1 :]
-        preRight = preorder[1 + len(preLeft) :]
-        t1 = TreeNode(root)
-        t1.left = self.helper(preLeft, inLeft)
-        t1.right = self.helper(preRight, inRight)
-        return t1
+        return root
